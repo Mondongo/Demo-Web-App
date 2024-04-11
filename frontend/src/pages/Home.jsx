@@ -1,7 +1,6 @@
 import React from 'react'
-import MainContent from '../html/MainContent'
-import { useEffect } from 'react'
-
+import { useEffect, useState } from 'react'
+import Spinner from '../components/Spinner'
 
 
 
@@ -9,33 +8,68 @@ import { useEffect } from 'react'
 
 const Home = () => {
 
-
-  const texto = `
-    <div><p>my texto aca</p></div>
-    <div><p>my texto aca</p></div>
-    <div><h3>my texto aca</h3></div>
-  `
-
-
-
+  const [books, setBooks] = useState([])
+  const [loading, setLoading] = useState(false)
 
 
   useEffect(() => {
-    console.log('cuando empieza--------------->');
 
-    //clear------------------>
+    setLoading(true);
+    fetch('http://localhost:5555/books')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Hubo un problema al obtener los libros.')
+        }
+        return response.json();
+      })
+      .then(data => {
+        setBooks(data.data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.log(err)
+        setLoading(false)
+      })
+
+
+    //clear funct
     return () => {
-
-      console.log('cuando termina--------------->');
-
     }
   }, [])
 
 
 
-
   return (
-    <div id='content' dangerouslySetInnerHTML={{ __html: texto }} />
+    <>
+      <h1>HOME</h1>
+      <br />
+
+      {
+        loading ? (<Spinner />) :
+          (<table border={1} cellPadding={8}>
+            <thead>
+              <tr>
+                <th>NO</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Publish year</th>
+                <th>Operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              {books.map((book, index) => (
+                <tr key={book._id}>
+                  <td>{index + 1}</td>
+                  <td>{book.title}</td>
+                  <td>{book.author}</td>
+                  <td>{book.publishYear}</td>
+                  <td>Options</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>)
+      }
+    </>
   )
 }
 
